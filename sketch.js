@@ -10,6 +10,7 @@ let currentPopulation;
 let population = [];
 let fitness = [];
 let bestFitness;
+let bestIdx;
 
 function setup() {
   createCanvas(600, 600);
@@ -67,6 +68,7 @@ function draw() {
 
   if(currentPopulation === population.length) {
     console.log("BEST FITNESS : " + bestFitness);
+    console.log("BEST WEIGHTS : " + population[bestIdx].weights);
     console.log("GENERATING NEXT GENERATION...");
     nextGeneration();
     currentPopulation = 0;
@@ -86,10 +88,12 @@ function draw() {
 
   if (s.death()) {
     console.log("GAME OVER: " + currentPopulation);
+    console.log("LENGTH: " + s.tail.length);
     fitness[currentPopulation] = s.tail.length + frameCount/(cols*rows*-1)
     console.log("Fitness = " + fitness[currentPopulation]);
     if (bestFitness < fitness[currentPopulation]) {
       bestFitness = fitness[currentPopulation];
+      bestIdx = currentPopulation;
     }
 
     currentPopulation++;
@@ -101,6 +105,7 @@ function draw() {
     console.log("Fitness = " + fitness[currentPopulation]);
     if (bestFitness < fitness[currentPopulation]) {
       bestFitness = fitness[currentPopulation];
+      bestIdx = currentPopulation;
     }
 
     currentPopulation++;

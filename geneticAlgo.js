@@ -28,7 +28,7 @@ function crossover() {
   for (let i = 0; i < floor(population.length*(1 - survivalRate)); i++) {
     let parentA = floor(random(0, population.length*survivalRate));
     let parentB = floor(random(0, population.length*survivalRate));
-    console.log("Crossing : " + parentA + " with " + parentB);
+    // console.log("Crossing : " + parentA + " with " + parentB);
     let newWeights = [];
     let norm = sqrt(fitness[parentA]*fitness[parentA] + fitness[parentB]*fitness[parentB]);
     for (let j = 0; j < numWeights; j++) {

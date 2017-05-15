@@ -41,13 +41,7 @@ function Snake(x, y, xspeed, yspeed, total, tail, weights) {
         }
       }
     }
-
-    if (die === true) {
-      this.xspeed = 0;
-      this.yspeed = 0;
-      this.total = 0;
-      this.tail = [];
-    }
+    
     return die;
   }
 
