@@ -98,7 +98,7 @@ function Snake(x, y, xspeed, yspeed, total, tail, weights) {
         this.yspeed = -1;
         break;
       default :
-        console.log("NOWHERE TO GO");
+        // console.log("NOWHERE TO GO"  );
     }
 
     if (this.total === this.tail.length) {   //didnt eat food

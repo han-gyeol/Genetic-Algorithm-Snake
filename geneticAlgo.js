@@ -1,5 +1,5 @@
 let mutationRate = 0.05;
-let survivalRate = 0.3;
+let survivalRate = 0.7;
 let numWeights = 3;
 
 function nextGeneration() {
@@ -30,7 +30,8 @@ function crossover() {
     let parentB = floor(random(0, population.length*survivalRate));
     // console.log("Crossing : " + parentA + " with " + parentB);
     let newWeights = [];
-    let norm = sqrt(fitness[parentA]*fitness[parentA] + fitness[parentB]*fitness[parentB]);
+    // let norm = sqrt(fitness[parentA]*fitness[parentA] + fitness[parentB]*fitness[parentB]);
+    let norm = fitness[parentA] + fitness[parentB];
     for (let j = 0; j < numWeights; j++) {
       let weight = population[parentA].weights[j]*(fitness[parentA]/norm) + population[parentB].weights[j]*(fitness[parentB]/norm);
       newWeights.push(weight);
