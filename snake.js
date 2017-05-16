@@ -5,7 +5,9 @@ function Snake(x, y, xspeed, yspeed, total, tail, weights) {
   this.yspeed = yspeed;
   this.total = total;
   this.tail = tail.slice();
+  this.birthtime;
   this.weights = weights;
+  this.previousPos = createVector(-1, -1);
   this.heuristic = new Heuristic(this, this.weights);
 
   this.eat = function(pos) {
@@ -41,14 +43,14 @@ function Snake(x, y, xspeed, yspeed, total, tail, weights) {
         }
       }
     }
-    
+
     return die;
   }
 
   this.end = function() {
     let cols = width/scale;
     let rows = height/scale;
-    if(this.tail.length === cols*rows-1) {
+    if (this.tail.length === cols*rows-1) {
       this.xspeed = 0;
       this.yspeed = 0;
       return true;
@@ -57,6 +59,9 @@ function Snake(x, y, xspeed, yspeed, total, tail, weights) {
   }
 
   this.update = function() {
+    this.previousPos.x = this.x;
+    this.previousPos.y = this.y;
+
     if (this.total === this.tail.length) {   //didnt eat food
       for (let i = 0; i < this.tail.length-1; i++) {
         this.tail[i] = this.tail[i+1];
@@ -72,6 +77,9 @@ function Snake(x, y, xspeed, yspeed, total, tail, weights) {
   }
 
   this.makeMove = function(dir) {
+    this.previousPos.x = this.x;
+    this.previousPos.y = this.y;
+
     switch (dir) {
       case 0:
         this.xspeed = 1;
@@ -92,6 +100,7 @@ function Snake(x, y, xspeed, yspeed, total, tail, weights) {
       default :
         console.log("NOWHERE TO GO");
     }
+
     if (this.total === this.tail.length) {   //didnt eat food
       for (let i = 0; i < this.tail.length-1; i++) {
         this.tail[i] = this.tail[i+1];
@@ -125,6 +134,7 @@ function Snake(x, y, xspeed, yspeed, total, tail, weights) {
     let ds;
     let fitness;
     let dir = -1;
+    let nextPos = createVector(-1, -1);
 
     ds = new Snake(this.x, this.y, 1, 0, this.total, this.tail, this.weights);
     ds.update();
@@ -132,6 +142,7 @@ function Snake(x, y, xspeed, yspeed, total, tail, weights) {
     if (bestFitness < fitness) {
       bestFitness = fitness;
       dir = 0;
+      nextPos = createVector(this.x+scale, this.y);
     }
 
     ds = new Snake(this.x, this.y, -1, 0, this.total, this.tail, this.weights);
@@ -140,6 +151,7 @@ function Snake(x, y, xspeed, yspeed, total, tail, weights) {
     if (bestFitness < fitness) {
       bestFitness = fitness;
       dir = 1;
+      nextPos = createVector(this.x-scale, this.y);
     }
 
     ds = new Snake(this.x, this.y, 0, 1, this.total, this.tail, this.weights);
@@ -148,6 +160,7 @@ function Snake(x, y, xspeed, yspeed, total, tail, weights) {
     if (bestFitness < fitness) {
       bestFitness = fitness;
       dir = 2;
+      nextPos = createVector(this.x, this.y+scale);
     }
 
     ds = new Snake(this.x, this.y, 0, -1, this.total, this.tail, this.weights);
@@ -156,6 +169,11 @@ function Snake(x, y, xspeed, yspeed, total, tail, weights) {
     if (bestFitness < fitness) {
       bestFitness = fitness;
       dir = 3;
+      nextPos = createVector(this.x, this.y-scale);
+    }
+
+    if (this.previousPos.x === nextPos.x && this.previousPos.y === nextPos.y) {
+      dir = -1;
     }
 
     return dir;

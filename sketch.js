@@ -1,11 +1,13 @@
 let s;
-let scale = 20;
+let scale = 50;
 let cols;
 let rows;
 let food;
 let timeout;
+let limit;
+let timeTaken;
 
-let popSize = 10;
+let popSize = 100;
 let currentPopulation;
 let population = [];
 let fitness = [];
@@ -16,6 +18,7 @@ function setup() {
   createCanvas(600, 600);
   cols = floor(width/scale);
   rows = floor(height/scale);
+  limit = cols*rows;
   // frameRate(5);
   initPopulation();
   start();
@@ -24,7 +27,20 @@ function setup() {
 function start() {
   currentPopulation = 0;
   bestFitness = Number.NEGATIVE_INFINITY;
-  s = new Snake(0, 0, 1, 0, 0, [], population[currentPopulation].weights);
+  s = population[0];
+  s.birthtime = frameCount;
+  pickFirstFoodLocation();
+}
+
+function nextSnake() {
+  if (bestFitness < fitness[currentPopulation]) {
+    bestFitness = fitness[currentPopulation];
+    bestIdx = currentPopulation;
+  }
+
+  currentPopulation++;
+  s = population[currentPopulation];
+  s.birthtime = frameCount;
   pickFirstFoodLocation();
 }
 
@@ -38,14 +54,12 @@ function initPopulation() {
 function pickFirstFoodLocation() {
   food = createVector(floor(random(cols)), floor(random(rows)));
   food.mult(scale);
-  timeout = frameCount + cols*rows;
-  // timeout = frameCount + 20;
+  timeout = frameCount + limit;
 }
 
 function pickLocation() {
   let check = true;
-  timeout = frameCount + cols*rows;
-  // timeout = frameCount + 20;
+  timeout = frameCount + limit;
 
   while(check) {
     check = false;
@@ -65,8 +79,7 @@ function pickLocation() {
 
 function draw() {
   background(51);
-
-  if(currentPopulation === population.length) {
+  if (currentPopulation === population.length-1) {
     console.log("BEST FITNESS : " + bestFitness);
     console.log("BEST WEIGHTS : " + population[bestIdx].weights);
     console.log("GENERATING NEXT GENERATION...");
@@ -75,7 +88,7 @@ function draw() {
     s = population[currentPopulation];
   }
 
-  if(s.eat(food)) {
+  if (s.eat(food)) {
     pickLocation();
   }
   // s.update();
@@ -89,28 +102,14 @@ function draw() {
   if (s.death()) {
     console.log("GAME OVER: " + currentPopulation);
     console.log("LENGTH: " + s.tail.length);
-    fitness[currentPopulation] = s.tail.length + frameCount/(cols*rows*-1)
+    fitness[currentPopulation] = s.tail.length + (frameCount-s.birthtime)/(cols*rows*-1)
     console.log("Fitness = " + fitness[currentPopulation]);
-    if (bestFitness < fitness[currentPopulation]) {
-      bestFitness = fitness[currentPopulation];
-      bestIdx = currentPopulation;
-    }
-
-    currentPopulation++;
-    s = population[currentPopulation];
-    pickFirstFoodLocation();
+    nextSnake();
   } else if (s.end()) {
     console.log("GAME COMPLETE: " + currentPopulation);
     fitness[currentPopulation] = s.tail.length + frameCount/(cols*rows*-1)
     console.log("Fitness = " + fitness[currentPopulation]);
-    if (bestFitness < fitness[currentPopulation]) {
-      bestFitness = fitness[currentPopulation];
-      bestIdx = currentPopulation;
-    }
-
-    currentPopulation++;
-    s = population[currentPopulation];
-    pickFirstFoodLocation();
+    nextSnake();
   }
 }
 
