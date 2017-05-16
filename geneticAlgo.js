@@ -1,5 +1,5 @@
-let mutationRate = 0.01;
-let survivalRate = 0.7;
+let mutationRate = 0.05;
+let survivalRate = 0.3;
 let numWeights = 3;
 
 function nextGeneration() {
@@ -36,7 +36,7 @@ function crossover() {
       newWeights.push(weight);
     }
     let child = new Snake(0, 0, 1, 0, 0, [], newWeights);
-    population[population.length-i] = child;
+    population[population.length-i-1] = child;
   }
 }
 
