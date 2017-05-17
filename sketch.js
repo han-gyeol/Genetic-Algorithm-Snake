@@ -63,10 +63,16 @@ function nextSnake() {
   pickFirstFoodLocation();
 }
 
+function playAgain() {
+  s = new Snake(0, 0, 0, 0, 0, [], population[currentPopulation].weights);
+  s.birthtime = frameCount;
+  pickFirstFoodLocation();
+}
+
 function initPopulation() {
   for (let i = 0; i < popSize; i++) {
     let weights = [random(-1, 1), random(-1, 1), random(-1, 1), random(-1, 1)];
-    population.push(new Snake(0, 0, 1, 0, 0, [], weights));
+    population.push(new Snake(0, 0, 0, 0, 0, [], weights));
   }
   sumFitness = 0;
   playCount = 0;
@@ -113,6 +119,7 @@ function draw() {
   rect(food.x, food.y, scale, scale);
 
   if (s.death()) {
+    let roundOver = false;
     // PLAY ROUNDS OVER
     if(playCount === gamesEachPopulation) {
       fitness[currentPopulation] = sumFitness / gamesEachPopulation;
@@ -120,6 +127,8 @@ function draw() {
       console.log("Fitness = " + fitness[currentPopulation]);
       sumFitness = 0;
       playCount = 0;
+
+      roundOver = true;
     }
     // PLAY ROUNDS NOT OVER
     else {
@@ -131,7 +140,11 @@ function draw() {
     if (currentPopulation === population.length-1) {
       endGeneration();
     } else {
-      nextSnake();
+      if (roundOver) {
+        nextSnake();
+      } else {
+        playAgain();
+      }
     }
   } else if (s.end()) {
     console.log("GAME COMPLETE: " + currentPopulation);
