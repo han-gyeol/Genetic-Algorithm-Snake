@@ -44,9 +44,12 @@ function start() {
 function endGeneration() {
   console.log("BEST FITNESS : " + bestFitness);
   console.log("BEST WEIGHTS : " + population[bestIdx].weights);
-  console.log(fitness);
   console.log("GENERATING NEXT GENERATION...");
   nextGeneration();
+  // for (let i = 0; i < popSize; i++) {
+  //   console.log(population[i].weights);
+  // }
+  // console.log(fitness);
   currentPopulation = 0;
   s = population[currentPopulation];
 }
@@ -58,6 +61,9 @@ function nextSnake() {
   }
 
   currentPopulation++;
+  if (currentPopulation === population.length) {
+    endGeneration();
+  }
   s = population[currentPopulation];
   s.birthtime = frameCount;
   pickFirstFoodLocation();
@@ -123,7 +129,9 @@ function draw() {
     // PLAY ROUNDS OVER
     if(playCount === gamesEachPopulation) {
       fitness[currentPopulation] = sumFitness / gamesEachPopulation;
+      if (fitness[currentPopulation] < 0) fitness[currentPopulation] = 0;
       console.log("GAME OVER: " + currentPopulation);
+      console.log("WEIGHTS: " + population[currentPopulation].weights);
       console.log("Fitness = " + fitness[currentPopulation]);
       sumFitness = 0;
       playCount = 0;
@@ -132,19 +140,15 @@ function draw() {
     }
     // PLAY ROUNDS NOT OVER
     else {
-      sumFitness += s.tail.length + (frameCount-s.birthtime)/(cols*rows*-0.5);
+      sumFitness += s.tail.length + (frameCount-s.birthtime)/(cols*rows*-0.1);
       playCount++;
     }
 
     // GENERATION OVER
-    if (currentPopulation === population.length-1) {
-      endGeneration();
+    if (roundOver) {
+      nextSnake();
     } else {
-      if (roundOver) {
-        nextSnake();
-      } else {
-        playAgain();
-      }
+      playAgain();
     }
   } else if (s.end()) {
     console.log("GAME COMPLETE: " + currentPopulation);

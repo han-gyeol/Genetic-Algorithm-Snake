@@ -1,11 +1,12 @@
 let mutationRate = 0.05;
 let survivalRate = 0.7;
-let numWeights = 3;
+let numWeights = 4;
 
 function nextGeneration() {
   sortPopulation();
   crossover();
   mutate();
+  sortPopulation();
 }
 
 function sortPopulation() {
@@ -26,18 +27,38 @@ function sortPopulation() {
 
 function crossover() {
   for (let i = 0; i < floor(population.length*(1 - survivalRate)); i++) {
-    let parentA = floor(random(0, population.length*survivalRate));
-    let parentB = floor(random(0, population.length*survivalRate));
-    // console.log("Crossing : " + parentA + " with " + parentB);
+    let CDF = [];
+    CDF[0] = fitness[0];
+    for (let j = 1; j < population.length; j++) {
+      CDF[j] = CDF[j-1] + fitness[j];
+    }
+    let top = CDF[population.length-1];
+    let pickA = random(0, top);
+    let pickB = random(0, top);
+    let parentA;
+    let parentB;
+    for (let j = 0; j < population.length; j++) {
+      if (pickA <= CDF[j]) {
+        parentA = j;
+        break;
+      }
+    }
+    for (let j = 0; j < population.length; j++) {
+      if (pickB <= CDF[j]) {
+        parentB = j;
+        break;
+      }
+    }
     let newWeights = [];
-    // let norm = sqrt(fitness[parentA]*fitness[parentA] + fitness[parentB]*fitness[parentB]);
     let norm = fitness[parentA] + fitness[parentB];
+    if (norm === 0) continue;
     for (let j = 0; j < numWeights; j++) {
       let weight = population[parentA].weights[j]*(fitness[parentA]/norm) + population[parentB].weights[j]*(fitness[parentB]/norm);
       newWeights.push(weight);
     }
-    let child = new Snake(0, 0, 1, 0, 0, [], newWeights);
+    let child = new Snake(0, 0, 0, 0, 0, [], newWeights);
     population[population.length-i-1] = child;
+    console.log("crossover: " + child.weights);
   }
 }
 
@@ -45,7 +66,8 @@ function mutate() {
   for (let i = 0; i < population.length; i++) {
     for (let j = 0; j < numWeights; j++) {
       if (random(1) < mutationRate) {
-        population[i].heuristic.weights[j] = random(-1, 1);
+        population[i].weights[j] += random(-0.2, 0.2);
+        console.log("mutate: " + population[i].weights);
       }
     }
   }
