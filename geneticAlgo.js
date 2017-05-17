@@ -1,6 +1,6 @@
 let mutationRate = 0.05;
-let survivalRate = 0.7;
-let numWeights = 4;
+let survivalRate = 0.5;
+let numWeights = 5;
 
 function nextGeneration() {
   sortPopulation();

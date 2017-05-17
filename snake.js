@@ -32,6 +32,7 @@ function Snake(x, y, xspeed, yspeed, total, tail, weights) {
         this.y === scale*-1 || this.y === height  ) {
       die = true;
     } else if (frameCount === timeout) {
+      // console.log("TIME OUT");
       die = true;
     } else {
       for (let i = 0; i < this.tail.length; i++) {
@@ -98,7 +99,8 @@ function Snake(x, y, xspeed, yspeed, total, tail, weights) {
         this.yspeed = -1;
         break;
       default :
-        // console.log("NOWHERE TO GO"  );
+        // console.log("NOWHERE TO GO");
+        return true;
     }
 
     if (this.total === this.tail.length) {   //didnt eat food
@@ -113,6 +115,8 @@ function Snake(x, y, xspeed, yspeed, total, tail, weights) {
 
     this.x = constrain(this.x, scale*-1, width);
     this.y = constrain(this.y, scale*-1, height);
+
+    return false;
   }
 
   this.show = function() {
@@ -135,10 +139,12 @@ function Snake(x, y, xspeed, yspeed, total, tail, weights) {
     let fitness;
     let dir = -1;
     let nextPos = createVector(-1, -1);
+    // console.log("FINAL: " + this.x/scale + ", " + this.y/scale);
 
     ds = new Snake(this.x, this.y, 1, 0, this.total, this.tail, this.weights);
     ds.update();
     fitness = ds.heuristic.calculateFitness();
+    // console.log("right fitness: " + fitness);
     if (bestFitness < fitness) {
       bestFitness = fitness;
       dir = 0;
@@ -148,6 +154,7 @@ function Snake(x, y, xspeed, yspeed, total, tail, weights) {
     ds = new Snake(this.x, this.y, -1, 0, this.total, this.tail, this.weights);
     ds.update();
     fitness = ds.heuristic.calculateFitness();
+    // console.log("left fitness: " + fitness);
     if (bestFitness < fitness) {
       bestFitness = fitness;
       dir = 1;
@@ -157,6 +164,7 @@ function Snake(x, y, xspeed, yspeed, total, tail, weights) {
     ds = new Snake(this.x, this.y, 0, 1, this.total, this.tail, this.weights);
     ds.update();
     fitness = ds.heuristic.calculateFitness();
+    // console.log("down fitness: " + fitness);
     if (bestFitness < fitness) {
       bestFitness = fitness;
       dir = 2;
@@ -166,15 +174,17 @@ function Snake(x, y, xspeed, yspeed, total, tail, weights) {
     ds = new Snake(this.x, this.y, 0, -1, this.total, this.tail, this.weights);
     ds.update();
     fitness = ds.heuristic.calculateFitness();
+    // console.log("up fitness: " + fitness);
     if (bestFitness < fitness) {
       bestFitness = fitness;
       dir = 3;
       nextPos = createVector(this.x, this.y-scale);
     }
+    // console.log("------------------------------- dir: " + dir);
 
-    if (this.previousPos.x === nextPos.x && this.previousPos.y === nextPos.y) {
-      dir = -1;
-    }
+    // if (this.previousPos.x === nextPos.x && this.previousPos.y === nextPos.y) {
+    //   dir = -1;
+    // }
 
     return dir;
   }

@@ -7,7 +7,7 @@ let timeout;
 let limit;
 let timeTaken;
 
-let popSize = 100;
+let popSize = 20;
 let currentPopulation;
 let population = [];
 let fitness = [];
@@ -22,8 +22,9 @@ function setup() {
   // noLoop();
   cols = floor(width/scale);
   rows = floor(height/scale);
-  limit = cols*rows;
-  // frameRate(5);
+  // limit = cols*rows;
+  limit = 50;
+  // frameRate(10);
   initPopulation();
   start();
 }
@@ -36,7 +37,7 @@ function start() {
   currentPopulation = 0;
   bestFitness = Number.NEGATIVE_INFINITY;
   s = population[0];
-  // s = new Snake(0, 0, 1, 0, 0, [], [-3, 1, -2]);
+  // s = new Snake(0, 0, 1, 0, 0, [], [-3, 0, 2, 0, 1]);
   s.birthtime = frameCount;
   pickFirstFoodLocation();
 }
@@ -77,7 +78,7 @@ function playAgain() {
 
 function initPopulation() {
   for (let i = 0; i < popSize; i++) {
-    let weights = [random(-1, 1), random(-1, 1), random(-1, 1), random(-1, 1)];
+    let weights = [random(-1, 1), random(-1, 1), random(-1, 1), random(-1, 1), random(-1, 1)];
     population.push(new Snake(0, 0, 0, 0, 0, [], weights));
   }
   sumFitness = 0;
@@ -117,14 +118,15 @@ function draw() {
     pickLocation();
   }
   // s.update();
-  s.makeMove(s.pickDir());
+  let noWhereToGo = false;
+  noWhereToGo = s.makeMove(s.pickDir());
   s.show();
 
   fill(255, 0, 100);
 
   rect(food.x, food.y, scale, scale);
 
-  if (s.death()) {
+  if (s.death() || noWhereToGo === true) {
     let roundOver = false;
     // PLAY ROUNDS OVER
     if(playCount === gamesEachPopulation) {

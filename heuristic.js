@@ -8,22 +8,26 @@ function Heuristic(snake, weights) {
   const centerDistIdx = 1;
   const compactnessIdx = 2;
   const connectivityIdx = 3;
+  const deadendIdx = 4;
 
   this.weights[foodDistIdx] = weights[foodDistIdx];
   this.weights[centerDistIdx] = weights[centerDistIdx];
   this.weights[compactnessIdx] = weights[compactnessIdx];
   this.weights[connectivityIdx] = weights[connectivityIdx];
+  this.weights[deadendIdx] = weights[deadendIdx];
 
   this.calculateFitness = function() {
     this.initGrid();
     if(this.snake.death() === true) {
       return Number.NEGATIVE_INFINITY;
     }
-    let connection = (this.connectivity())? 1000 : -1000;
+    let connection = (this.connectivity())? 100 : -100;
+    let deadlock = (this.deadend())? -100 : 100;
     return this.weights[foodDistIdx] * this.foodDist(food)
           +this.weights[centerDistIdx] * this.centerDist()
           +this.weights[compactnessIdx] * this.compactness()
           +this.weights[connectivityIdx] * connection;
+          +this.weights[deadendIdx] * deadlock;
   }
 
   this.initGrid = function() {
@@ -57,11 +61,11 @@ function Heuristic(snake, weights) {
   }
 
   this.foodDist = function(food) {
-    return dist(this.snake.x, this.snake.y, food.x, food.y);
+    return dist(this.snake.x, this.snake.y, food.x, food.y)/scale;
   }
 
   this.centerDist = function() {
-    return dist(this.snake.x, this.snake.y, width/2, height/2);
+    return dist(this.snake.x, this.snake.y, width/2, height/2)/scale;
   }
 
   this.newCompactness = function() {
@@ -148,6 +152,45 @@ function Heuristic(snake, weights) {
       for (let j = 0; j < cols; j++) {
         if (tempGrid[i][j] === 0) {
           check = false;
+        }
+      }
+    }
+
+    return check;
+  }
+
+  this.deadend = function() {
+    let check = false;
+    let start;
+    let tempGrid = [];
+    for (let i = 0; i < rows; i++) {
+      tempGrid[i] = [];
+      for (let j = 0; j < cols; j++) {
+        tempGrid[i][j] = this.grid[i][j];
+      }
+    }
+
+    start = createVector(this.snake.x/scale+1, this.snake.y/scale);
+    if (start.x !== cols && tempGrid[start.y][start.x] === 0) {
+      this.propagate(start, tempGrid);
+    }
+    start = createVector(this.snake.x/scale-1, this.snake.y/scale);
+    if (start.x !== -1 && tempGrid[start.y][start.x] === 0) {
+      this.propagate(start, tempGrid);
+    }
+    start = createVector(this.snake.x/scale, this.snake.y/scale+1);
+    if (start.y !== rows && tempGrid[start.y][start.x] === 0) {
+      this.propagate(start, tempGrid);
+    }
+    start = createVector(this.snake.x/scale, this.snake.y/scale-1);
+    if (start.y !== -1 && tempGrid[start.y][start.x] === 0) {
+      this.propagate(start, tempGrid);
+    }
+
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        if (tempGrid[food.y/scale][food.x/scale] === 0) {
+          check = true;
         }
       }
     }
