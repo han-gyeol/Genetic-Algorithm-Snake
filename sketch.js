@@ -11,6 +11,9 @@ let popSize = 100;
 let currentPopulation;
 let population = [];
 let fitness = [];
+let playCount;
+let sumFitness;
+let gamesEachPopulation = 3;
 let bestFitness;
 let bestIdx;
 
@@ -62,9 +65,11 @@ function nextSnake() {
 
 function initPopulation() {
   for (let i = 0; i < popSize; i++) {
-    let weights = [random(-1, 1), random(-1, 1), random(-1, 1)];
+    let weights = [random(-1, 1), random(-1, 1), random(-1, 1), random(-1, 1)];
     population.push(new Snake(0, 0, 1, 0, 0, [], weights));
   }
+  sumFitness = 0;
+  playCount = 0;
 }
 
 function pickFirstFoodLocation() {
@@ -108,10 +113,21 @@ function draw() {
   rect(food.x, food.y, scale, scale);
 
   if (s.death()) {
-    console.log("GAME OVER: " + currentPopulation);
-    console.log("LENGTH: " + s.tail.length);
-    fitness[currentPopulation] = s.tail.length + (frameCount-s.birthtime)/(cols*rows*-0.5);
-    console.log("Fitness = " + fitness[currentPopulation]);
+    // PLAY ROUNDS OVER
+    if(playCount === gamesEachPopulation) {
+      fitness[currentPopulation] = sumFitness / gamesEachPopulation;
+      console.log("GAME OVER: " + currentPopulation);
+      console.log("Fitness = " + fitness[currentPopulation]);
+      sumFitness = 0;
+      playCount = 0;
+    }
+    // PLAY ROUNDS NOT OVER
+    else {
+      sumFitness += s.tail.length + (frameCount-s.birthtime)/(cols*rows*-0.5);
+      playCount++;
+    }
+
+    // GENERATION OVER
     if (currentPopulation === population.length-1) {
       endGeneration();
     } else {

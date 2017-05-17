@@ -6,20 +6,24 @@ function Heuristic(snake, weights) {
 
   const foodDistIdx = 0;
   const centerDistIdx = 1;
-  const compactnessIdx = 0;
+  const compactnessIdx = 2;
+  const connectivityIdx = 3;
 
   this.weights[foodDistIdx] = weights[foodDistIdx];
   this.weights[centerDistIdx] = weights[centerDistIdx];
   this.weights[compactnessIdx] = weights[compactnessIdx];
+  this.weights[connectivityIdx] = weights[connectivityIdx];
 
   this.calculateFitness = function() {
     this.initGrid();
-    if(this.snake.death() === true || this.connectivity() === false) {
+    if(this.snake.death() === true) {
       return Number.NEGATIVE_INFINITY;
     }
+    let connection = (this.connectivity())? 1000 : -1000;
     return this.weights[foodDistIdx] * this.foodDist(food)
           +this.weights[centerDistIdx] * this.centerDist()
-          +this.weights[compactnessIdx] * this.compactness();
+          +this.weights[compactnessIdx] * this.compactness()
+          +this.weights[connectivityIdx] * connection;
   }
 
   this.initGrid = function() {
