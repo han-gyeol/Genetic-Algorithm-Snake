@@ -78,7 +78,7 @@ function playAgain() {
 
 function initPopulation() {
   for (let i = 0; i < popSize; i++) {
-    let weights = [random(-1, 1), random(-1, 1), random(-1, 1), random(-1, 1), random(-1, 1)];
+    let weights = [random(-1, 0), random(-1, 1), random(-1, 1), random(0, 1), random(-1, 0)];
     population.push(new Snake(0, 0, 0, 0, 0, [], weights));
   }
   sumFitness = 0;

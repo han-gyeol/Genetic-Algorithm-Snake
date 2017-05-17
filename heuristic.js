@@ -22,11 +22,11 @@ function Heuristic(snake, weights) {
       return Number.NEGATIVE_INFINITY;
     }
     let connection = (this.connectivity())? 100 : -100;
-    let deadlock = (this.deadend())? -100 : 100;
+    let deadlock = (this.deadend())? 100 : -100;
     return this.weights[foodDistIdx] * this.foodDist(food)
           +this.weights[centerDistIdx] * this.centerDist()
           +this.weights[compactnessIdx] * this.compactness()
-          +this.weights[connectivityIdx] * connection;
+          +this.weights[connectivityIdx] * connection
           +this.weights[deadendIdx] * deadlock;
   }
 
@@ -65,7 +65,27 @@ function Heuristic(snake, weights) {
   }
 
   this.centerDist = function() {
-    return dist(this.snake.x, this.snake.y, width/2, height/2)/scale;
+    let distGrid = new Array(rows);
+    for (let i = 0; i < rows; i++) {
+      distGrid[i] = new Array(cols);
+      for (let j = 0; j < cols; j++) {
+        distGrid[i][j] = 0;
+      }
+    }
+    for (let i = 0; i < Math.min(rows, cols)/2; i++) {
+      for (let j = 0+i; j < cols-i; j++) {
+        distGrid[i][j] = i+1;
+        distGrid[rows-i-1][j] = i+1;
+      }
+      for (let j = 0+i; j < rows-i; j++) {
+        distGrid[j][i] = i+1;
+        distGrid[j][cols-i-1] = i+1;
+      }
+    }
+
+    let row = this.snake.x/scale;
+    let col = this.snake.y/scale;
+    return distGrid[row][col]/10;
   }
 
   this.newCompactness = function() {
