@@ -21,13 +21,21 @@ function Heuristic(snake, weights) {
     if(this.snake.death() === true) {
       return Number.NEGATIVE_INFINITY;
     }
-    let connection = (this.connectivity())? 100 : -100;
-    let deadlock = (this.deadend())? 100 : -100;
+
+    if(this.connectivity() !== 0 || this.deadend() !== 0) {
+    console.log("-----------------------------------");
+    console.log("foodDist: " + this.foodDist(food));
+    console.log("centerDist: " + this.centerDist());
+    console.log("compactness: " + this.compactness());
+    console.log("connectivity: " + this.connectivity());
+    console.log("deadend: " + this.deadend());
+    console.log("-----------------------------------");
+    }
     return this.weights[foodDistIdx] * this.foodDist(food)
           +this.weights[centerDistIdx] * this.centerDist()
           +this.weights[compactnessIdx] * this.compactness()
-          +this.weights[connectivityIdx] * connection
-          +this.weights[deadendIdx] * deadlock;
+          +this.weights[connectivityIdx] * this.connectivity();
+          +this.weights[deadendIdx] * this.deadend();
   }
 
   this.initGrid = function() {
@@ -61,7 +69,7 @@ function Heuristic(snake, weights) {
   }
 
   this.foodDist = function(food) {
-    return dist(this.snake.x, this.snake.y, food.x, food.y)/scale;
+    return sq(dist(this.snake.x, this.snake.y, food.x, food.y)/scale);
   }
 
   this.centerDist = function() {
@@ -85,7 +93,7 @@ function Heuristic(snake, weights) {
 
     let row = this.snake.x/scale;
     let col = this.snake.y/scale;
-    return distGrid[row][col]/10;
+    return distGrid[row][col];
   }
 
   this.newCompactness = function() {
@@ -154,8 +162,8 @@ function Heuristic(snake, weights) {
   }
 
   this.connectivity = function() {
-    let check = true;
     let tempGrid = [];
+    let blankCount = 0;
     for (let i = 0; i < rows; i++) {
       tempGrid[i] = [];
       for (let j = 0; j < cols; j++) {
@@ -171,18 +179,18 @@ function Heuristic(snake, weights) {
     for (let i = 0; i < rows; i++) {
       for (let j = 0; j < cols; j++) {
         if (tempGrid[i][j] === 0) {
-          check = false;
+          blankCount++;
         }
       }
     }
 
-    return check;
+    return blankCount;
   }
 
   this.deadend = function() {
-    let check = false;
     let start;
     let tempGrid = [];
+    let blankCount = 0;
     for (let i = 0; i < rows; i++) {
       tempGrid[i] = [];
       for (let j = 0; j < cols; j++) {
@@ -209,13 +217,13 @@ function Heuristic(snake, weights) {
 
     for (let i = 0; i < rows; i++) {
       for (let j = 0; j < cols; j++) {
-        if (tempGrid[food.y/scale][food.x/scale] === 0) {
-          check = true;
+        if (tempGrid[i][j] == 0) {
+          blankCount++;
         }
       }
     }
 
-    return check;
+    return blankCount;
   }
 
   this.propagate = function(start, tempGrid) {
