@@ -5,13 +5,13 @@ function Heuristic(snake, weights) {
   this.grid;
 
   const foodDistIdx = 0;
-  const centerDistIdx = 1;
+  const squarenessIdx = 1;
   const compactnessIdx = 2;
   const connectivityIdx = 3;
   const deadendIdx = 4;
 
   this.weights[foodDistIdx] = weights[foodDistIdx];
-  this.weights[centerDistIdx] = weights[centerDistIdx];
+  this.weights[squarenessIdx] = weights[squarenessIdx];
   this.weights[compactnessIdx] = weights[compactnessIdx];
   this.weights[connectivityIdx] = weights[connectivityIdx];
   this.weights[deadendIdx] = weights[deadendIdx];
@@ -22,20 +22,25 @@ function Heuristic(snake, weights) {
       return Number.NEGATIVE_INFINITY;
     }
 
-    if(this.connectivity() !== 0 || this.deadend() !== 0) {
-    console.log("-----------------------------------");
-    console.log("foodDist: " + this.foodDist(food));
-    console.log("centerDist: " + this.centerDist());
-    console.log("compactness: " + this.compactness());
-    console.log("connectivity: " + this.connectivity());
-    console.log("deadend: " + this.deadend());
-    console.log("-----------------------------------");
-    }
-    return this.weights[foodDistIdx] * this.foodDist(food)
-          +this.weights[centerDistIdx] * this.centerDist()
+    let heuristicValue = (this.weights[foodDistIdx] - this.snake.eatCount*0.01) * this.foodDist(food)
+          +this.weights[squarenessIdx] * this.squareness()
           +this.weights[compactnessIdx] * this.compactness()
-          +this.weights[connectivityIdx] * this.connectivity();
+          +this.weights[connectivityIdx] * this.connectivity()
           +this.weights[deadendIdx] * this.deadend();
+
+    // if(this.squareness() !== 0) {
+    // console.log("-----------------------------------");
+    // console.log("foodDist: " + this.foodDist(food));
+    // console.log("squareness: " + this.squareness());
+    // console.log("compactness: " + this.compactness());
+    // console.log("connectivity: " + this.connectivity());
+    // console.log("deadend: " + this.deadend());
+    // console.log("heurstic: " + heuristicValue);
+    // console.log(this.snake.eatCount);
+    // console.log("-----------------------------------");
+    // }
+
+    return heuristicValue;
   }
 
   this.initGrid = function() {
@@ -69,7 +74,9 @@ function Heuristic(snake, weights) {
   }
 
   this.foodDist = function(food) {
-    return sq(dist(this.snake.x, this.snake.y, food.x, food.y)/scale);
+    let xDist = abs(food.x - this.snake.x) / scale;
+    let yDist = abs(food.y - this.snake.y) / scale;
+    return (xDist + yDist);
   }
 
   this.centerDist = function() {
@@ -96,30 +103,28 @@ function Heuristic(snake, weights) {
     return distGrid[row][col];
   }
 
-  this.newCompactness = function() {
-    let count = 0;
-    for (let i = 0; i < this.snake.tail.length; i++) {
-      if (this.grid[this.snake.tail[i].y/scale][this.snake.tail[i].x/scale+1] === 1) {
-        count++;
-      } else if (this.grid[this.snake.tail[i].y/scale][this.snake.tail[i].x/scale-1] === 1) {
-        count++;
-      } else if (this.grid[this.snake.tail[i].y/scale+1][this.snake.tail[i].x/scale] === 1) {
-        count++;
-      } else if (this.grid[this.snake.tail[i].y/scale-1][this.snake.tail[i].x/scale] === 1) {
-        count++;
-      }
-    }
-    if (this.grid[this.snake.y/scale][this.snake.x/scale+1] === 1) {
-      count++;
-    } else if (this.grid[this.snake.y/scale][this.snake.x/scale-1] === 1) {
-      count++;
-    } else if (this.grid[this.snake.y/scale+1][this.snake.x/scale] === 1) {
-      count++;
-    } else if (this.grid[this.snake.y/scale-1][this.snake.x/scale] === 1) {
-      count++;
+  this.squareness = function() {
+    let xMax = this.snake.x;
+    let xMin = this.snake.x;
+    let yMax = this.snake.y;
+    let yMin = this.snake.y;
+    let blankCount = 0;
+    for (i = 0; i < this.snake.tail.length; i++) {
+      xMax = (xMax < this.snake.tail[i].x)? this.snake.tail[i].x : xMax;
+      xMin = (xMin > this.snake.tail[i].x)? this.snake.tail[i].x : xMin;
+      yMax = (yMax < this.snake.tail[i].y)? this.snake.tail[i].y : yMax;
+      yMin = (yMin > this.snake.tail[i].y)? this.snake.tail[i].y : yMin;
     }
 
-    return count/2;
+    for (let row = yMin/scale; row <= yMax/scale; row++) {
+      for (let col = xMin/scale; col <= xMax/scale; col++) {
+        if (this.grid[row][col] === 0) {
+          blankCount++;
+        }
+      }
+    }
+
+    return blankCount / (this.snake.tail.length+1) * 2;
   }
 
   this.compactness = function() {
@@ -158,7 +163,7 @@ function Heuristic(snake, weights) {
         count++;
       }
     }
-    return count/2;
+    return count/(this.snake.tail.length+1);
   }
 
   this.connectivity = function() {
@@ -228,23 +233,20 @@ function Heuristic(snake, weights) {
 
   this.propagate = function(start, tempGrid) {
     let next;
+    tempGrid[start.y][start.x] = 1;
     if (start.x !== cols-1 && tempGrid[start.y][start.x+1] === 0) {
-      tempGrid[start.y][start.x+1] = 1;
       next = createVector(start.x+1, start.y);
       this.propagate(next, tempGrid);
     }
     if (start.x !== 0 && tempGrid[start.y][start.x-1] === 0) {
-      tempGrid[start.y][start.x-1] = 1;
       next = createVector(start.x-1, start.y);
       this.propagate(next, tempGrid);
     }
     if (start.y !== rows-1 && tempGrid[start.y+1][start.x] === 0) {
-      tempGrid[start.y+1][start.x] = 1;
       next = createVector(start.x, start.y+1);
       this.propagate(next, tempGrid);
     }
     if (start.y !== 0 && tempGrid[start.y-1][start.x] === 0) {
-      tempGrid[start.y-1][start.x] = 1;
       next = createVector(start.x, start.y-1);
       this.propagate(next, tempGrid);
     }
