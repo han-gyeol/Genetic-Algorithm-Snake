@@ -7,7 +7,7 @@ let timeout;
 let limit;
 let timeTaken;
 
-let popSize = 200;
+let popSize = 10;
 let currentPopulation;
 let population = [];
 let fitness = [];
@@ -19,6 +19,7 @@ let bestIdx;
 
 function setup() {
   createCanvas(600, 600);
+  initGUI();
   // noLoop();
   cols = floor(width/scale);
   rows = floor(height/scale);
@@ -27,6 +28,11 @@ function setup() {
   // frameRate(10);
   initPopulation();
   start();
+}
+
+function initGUI() {
+  let button = document.createElement('button');
+  document.body.appendChild(button);
 }
 
 function mousePressed() {
@@ -78,7 +84,7 @@ function playAgain() {
 
 function initPopulation() {
   for (let i = 0; i < popSize; i++) {
-    let weights = [random(0, 0), random(-1, 0), random(-1, 1), random(-1, 0), random(-1, 0)];
+    let weights = [random(-1, 0), random(-1, 0), random(-1, 1), random(-1, 0), random(-1, 0)];
     population.push(new Snake(0, 0, 0, 0, 0, [], weights, 0));
   }
   sumFitness = 0;

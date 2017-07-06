@@ -66,6 +66,7 @@ function mutate() {
   for (let i = 0; i < population.length; i++) {
     for (let j = 0; j < numWeights; j++) {
       if (random(1) < mutationRate) {
+        population[i].weights[j] *= (1 + (1 - i/population.length));
         population[i].weights[j] += random(-0.2, 0.2);
         console.log("mutate: " + population[i].weights);
       }
